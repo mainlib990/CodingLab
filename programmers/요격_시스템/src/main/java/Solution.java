@@ -11,39 +11,39 @@ class Solution {
 
 class MissileInterceptionSystem {
 
-    private final SortedSet<XCoordinate> xCoordinates;
+    private final SortedSet<Missile> missiles;
 
     public MissileInterceptionSystem(int[][] targets) {
-        xCoordinates = Arrays.stream(targets)
-                .map(XCoordinate::new)
+        missiles = Arrays.stream(targets)
+                .map(Missile::new)
                 .collect(toCollection(TreeSet::new));
     }
 
     public MissileCommand strategy(MissileStrategy missileStrategy) {
-        return missileStrategy.apply(xCoordinates);
+        return missileStrategy.apply(missiles);
     }
 }
 
 @FunctionalInterface
 interface MissileStrategy {
 
-    MissileCommand apply(SortedSet<XCoordinate> xCoordinates);
+    MissileCommand apply(SortedSet<Missile> missiles);
 
     static MissileStrategy minMissiles() {
-        return xCoordinates -> () -> {
-            Iterator<XCoordinate> iterator = xCoordinates.iterator();
-            XCoordinate prevXCoordinate = iterator.next();
-            int count = 1;
-            while (iterator.hasNext()) {
-                XCoordinate currXCoordinate = iterator.next();
-                if (prevXCoordinate.includesStart(currXCoordinate)) {
-                    prevXCoordinate = prevXCoordinate.withStart(currXCoordinate).withMinEnd(currXCoordinate);
+        return missiles -> () -> {
+            Iterator<Missile> missileIterator = missiles.iterator();
+            Missile prevMissile = missileIterator.next();
+            int missileCount = 1;
+            while (missileIterator.hasNext()) {
+                Missile currMissile = missileIterator.next();
+                if (prevMissile.includesStart(currMissile)) {
+                    prevMissile = prevMissile.withStart(currMissile).withMinEnd(currMissile);
                 } else {
-                    prevXCoordinate = currXCoordinate;
-                    count++;
+                    prevMissile = currMissile;
+                    missileCount++;
                 }
             }
-            return count;
+            return missileCount;
         };
     }
 }
@@ -54,36 +54,36 @@ interface MissileCommand {
     int count();
 }
 
-class XCoordinate implements Comparable<XCoordinate> {
+class Missile implements Comparable<Missile> {
 
     private final int start;
     private final int end;
 
-    public XCoordinate(int[] xCoordinateInts) {
-        this(xCoordinateInts[0], xCoordinateInts[1]);
+    public Missile(int[] missileInts) {
+        this(missileInts[0], missileInts[1]);
     }
 
-    public XCoordinate(int start, int end) {
+    public Missile(int start, int end) {
         this.start = start;
         this.end = end;
     }
 
-    public boolean includesStart(XCoordinate target) {
+    public boolean includesStart(Missile target) {
         return (this.start <= target.start) && (target.start < this.end);
     }
 
-    public XCoordinate withStart(XCoordinate target) {
-        return new XCoordinate(target.start, this.end);
+    public Missile withStart(Missile target) {
+        return new Missile(target.start, this.end);
     }
 
-    public XCoordinate withMinEnd(XCoordinate target) {
-        return new XCoordinate(this.start, Math.min(this.end, target.end));
+    public Missile withMinEnd(Missile target) {
+        return new Missile(this.start, Math.min(this.end, target.end));
     }
 
     @Override
-    public int compareTo(XCoordinate target) {
-        return Comparator.<XCoordinate>comparingInt(xCoordinate -> xCoordinate.start)
-                .thenComparingInt(xCoordinate -> xCoordinate.end)
+    public int compareTo(Missile target) {
+        return Comparator.<Missile>comparingInt(missile -> missile.start)
+                .thenComparingInt(missile -> missile.end)
                 .compare(this, target);
     }
 
@@ -92,7 +92,7 @@ class XCoordinate implements Comparable<XCoordinate> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        XCoordinate that = (XCoordinate) o;
+        Missile that = (Missile) o;
 
         if (start != that.start) return false;
         return end == that.end;
