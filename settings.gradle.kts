@@ -14,3 +14,4 @@ rootProject.name = "CodingLab"
 
 include("running-race")
 include("memories-score")
+include("park-walking")
